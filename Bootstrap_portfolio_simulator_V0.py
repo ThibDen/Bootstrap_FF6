@@ -244,18 +244,19 @@ def create_histogram_gif(Returns_A, Returns_B, Start_invest, Monthly_DCA, portfo
     display(Image(data=gif))
 
 #function to generate tables
-def Table(data, title_port, table_text):
+def Table(data,months, title_port, table_text):
     percentiles = [1, 10, 25, 50, 75, 90, 99]
     labels = ['Worst 1%', 'Worst 10%', 'Worst 25%', 'Median', 'Best 25%', 'Best 10%', 'Best 1%']
-    years = [1, 3, 5, 10, 15, 20]
+    years = [1, 3, 5, 10, 15, 20,30,40,60,80]
 
     # Convert years to months
-    months = [year * 12-1 for year in years]
+    indice= [year * 12-1 for year in years]
+    indice = [i for i in indice if i < months] #select only years within the month range
 
     # Initialize an empty dataframe to store the results
     df = pd.DataFrame(index=labels)
     # Calculate the percentiles for each year
-    for month in months:
+    for month in indice:
         percentile_values = np.percentile(data[:, month], percentiles, axis=0)
         df[f'After {month//12+1} years'] = percentile_values
 
@@ -268,6 +269,7 @@ def Table(data, title_port, table_text):
         print(df.to_markdown(floatfmt='.2f'))
     else:
         print(df.to_markdown(floatfmt='.4f'))
+  
   
 
 
@@ -366,11 +368,11 @@ def calculate_returns_and_plot(months, merged_data, nr_sim, Start_invest, Monthl
     create_histogram_gif((Value_A/invested-1)*100, (Value_B/invested-1)*100, Start_invest, Monthly_DCA, title_port_A, title_port_B)
     create_histogram_gif(IRR_A, IRR_B, 0, 1, title_port_A, title_port_B)
     table_text=f'End value with DCA of {Monthly_DCA}, net of inlation'
-    Table(Value_A, title_port_A, table_text)
-    Table(Value_B, title_port_B, table_text)
+    Table(Value_A,months, title_port_A, table_text)
+    Table(Value_B,months, title_port_B, table_text)
     table_text= 'Anualized returns, net of inflation'
-    Table(IRR_A, title_port_A, table_text)
-    Table(IRR_B, title_port_B, table_text)
+    Table(IRR_A, months,title_port_A, table_text)
+    Table(IRR_B,months, title_port_B, table_text)
 
 # Call the function
 calculate_returns_and_plot(months, merged_data, nr_sim, Start_invest, Monthly_DCA,Net_of_costs,rebalance, portfolio_data_A,portfolio_data_B, haircut_min, haircut_max)
